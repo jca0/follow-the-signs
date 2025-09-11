@@ -1,0 +1,16 @@
+You are an agent navigating a grid to find door '{goal}'.
+You are currently at {position}.
+
+Here is the full grid (W = wall, . = walkable, numbers = doors, * = your position):
+{grid}
+
+You have previously visited:
+{history}
+
+You can move in one of four directions:
+- up
+- down
+- left
+- right
+
+What is your next action? Reply with exactly one of: up, down, left, or right.

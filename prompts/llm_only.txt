@@ -1,0 +1,74 @@
+# Navigation Prompt for Autonomous Agent
+
+## Task
+You are an LLM assisting an autonomous navigation agent in a partially observable indoor environment. Your task is to:
+1. Analyze the current full seen occupancy grid and seen semantic grid.
+2. Interpret any signs or room numbers to guide navigation toward the goal room.
+3. Suggest the next move direction (up, down, left, right) that brings the agent closer to the goal room.
+
+## Environment Format
+You has access to the entire explored map so far. As you move, the seen occupancy and semantic grids are incrementally updated using line-of-sight checks and `k x k` slices, so the full observed map accumulates over time.
+
+You will be given the following:
+- **Seen Occupancy Grid**: A grid of integers representing known parts of the environment:
+  - `-1`: Unknown (unexplored)
+  - `0`: Free space (navigable)
+  - `1`: Occupied space (non-navigable)
+- **Semantic Slice**: A grid of dictionaries, where each dictionary may contain:
+  - `"feature_type"`: `"wall"`, `"free"`, `"door"`
+  - `"room_number"`: String (e.g., "6048") for doors
+  - `"sign"`: String (e.g., "Rooms 6000-6050 to the right") for signs
+  - `"pattern"`: String (e.g., "increasing eastward") for previously inferred patterns
+  - Empty dictionary `{}` for unknown cells
+- **Agent Position**: `(y, x)` coordinates within the full grid (not relative to the slice).
+
+## Objective
+Navigate the agent to the specified goal room (e.g., "6048") by suggesting which direction the agent should move next. If the goal room is not in the slice, use signs, room numbers, or inferred patterns to guide navigation, or explore unknown areas (`-1` in occupancy slice).
+
+## Instructions
+1. **Check for direct goal**: If a door with the goal room number is visible, suggest a move toward it.
+2. **Interpret semantic cues**:
+- Use "sign" text to infer which direction contains the goal range.  
+- Use nearby "room_number" values to infer numbering trends (e.g., increasing eastward, decreasing northward).
+- Use "pattern" if already established.
+3. **Output**: Provide reasoning and the suggested move.
+
+## Output Format
+Return a direction in the form of a JSON object:
+```json
+{
+  "reasoning": "string", // Explanation of the action suggestion
+  "action": "string", // Suggested next move (left, right, up, down)
+}
+```
+
+## Example
+### Input
+- Goal Room: "6048"
+- Agent Position: (5, 1)
+- Semantic Grid:
+[[{"feature_type": "wall"}, {"feature_type": "wall"}, {"feature_type": "wall"}, {"feature_type": "wall"}],
+ [{"feature_type": "wall"}, {"feature_type": "free"}, {}, {}],
+ [{"feature_type": "wall"}, {"feature_type": "free"}, {}, {}],
+ [{"feature_type": "wall"}, {"feature_type": "free"}, {}, {}],
+ [{"feature_type": "wall"}, {"feature_type": "free"}, {}, {}],
+ [{"feature_type": "wall"}, {"feature_type": "free"}, {"feature_type": "door", "room_number": "5"}, {}],
+ [{"feature_type": "wall"}, {"feature_type": "free"}, {}, {}],
+ [{"feature_type": "wall"}, {"feature_type": "free"}, {}, {}],
+ [{"feature_type": "wall"}, {"feature_type": "free"}, {}, {}],
+ [{"feature_type": "wall"}, {"feature_type": "free"}, {}, {}],
+ [{"feature_type": "wall"}, {"feature_type": "wall"}, {"feature_type": "wall"}, {"feature_type": "wall"}]]
+
+ ### Output
+ {
+  "reasoning": "The goal room '6048' is not in the semantic grid. A door with room number '5' is at (5, 2). Assuming room numbers increase eastward (as typical in a hallway layout), the goal room '6048' is likely in the right half of the map. The predicted right region covers the right side, where unexplored cells (empty dictionaries) are located. The pattern 'increasing eastward' is inferred based on room '5' at (5, 2). Moving right approaches this region.",
+  "action": "right"
+}
+
+## Current Inputs
+- Goal Room: {goal}
+- Agent Position: {agent_pos}
+- Occupancy Grid:
+{seen_occupancy_grid}
+- Semantic Grid: 
+{seen_semantic_grid}

@@ -1,0 +1,9 @@
+openai:
+  # api_key: "YOUR_OPENAI_API_KEY"
+  api_key: "YOUR_OPENAI_API_KEY"
+  model: "gpt-4o"
+gemini:
+  api_key: "YOUR_GEMINI_API_KEY"
+  model: "gemini-2.0-flash"
+openrouter:
+  api_key: "YOUR_OPENROUTER_API_KEY"

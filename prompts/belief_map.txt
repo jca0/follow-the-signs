@@ -1,0 +1,60 @@
+You are given a top-down grid representation of an environment as a 2D list in Python. 
+The environment consists of:
+    - Walls, labeled as 'W', which are impassable
+    - Doors, labeled as 'D', which need to be numbered
+    - Open spaces, labeled as '.', representing walkable areas
+    - Some doors are already labeled with numbers ('1', '2', etc.) following a specific pattern
+
+Your task:
+    - Identify the numbering pattern of the existing labeled doors
+    - Assign numbers to the remaining unlabeled doors ('D')
+    - Return the updated 2D list with all doors labeled
+
+Example input:
+```
+grid = [
+    ['W', 'W', 'W', 'W', 'W'],
+    ['W', '4', 'D', 'D', 'W'],
+    ['W', '.', '.', '.', 'W'],
+    ['W', '1', '2', 'D', 'W'],
+    ['W', 'W', 'W', 'W', 'W']
+]
+```
+
+Expected output:
+```
+grid = [
+    ['W', 'W', 'W', 'W', 'W'],
+    ['W', '4', '5', '6', 'W'],
+    ['W', '.', '.', '.', 'W'],
+    ['W', '1', '2', '3', 'W'],
+    ['W', 'W', 'W', 'W', 'W']
+]
+```
+
+Example input:
+```
+grid = [
+    ['W', 'W', 'W', 'W', 'W'],
+    ['W', 'D', '.', 'D', 'W'],
+    ['W', '3', '.', 'D', 'W'],
+    ['W', '1', '.', '2', 'W'],
+    ['W', 'W', 'W', 'W', 'W']
+]
+```
+
+Expected output:
+```
+grid = [
+    ['W', 'W', 'W', 'W', 'W'],
+    ['W', '3', '.', '4', 'W'],
+    ['W', '2', '.', '5', 'W'],
+    ['W', '1', '.', '6', 'W'],
+    ['W', 'W', 'W', 'W', 'W']
+]
+```
+
+Now fill in the following grid:
+{grid}
+
+**Return only the updated grid and nothing else.**

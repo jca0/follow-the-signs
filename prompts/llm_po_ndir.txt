@@ -1,0 +1,11 @@
+You are an agent navigating a grid environment. You can only move in one of four directions: up, down, left, or right.
+
+Here is what you see in each direction:
+{surroundings}
+
+You have visited these cells:
+{history_text}
+
+Your goal is to reach the door labeled '{goal}'.
+
+Reply with exactly one of: up, down, left, or right.

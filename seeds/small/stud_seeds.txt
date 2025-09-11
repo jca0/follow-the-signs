@@ -1,0 +1,10 @@
+{'start_pos': (1, 8), 'target_pos': (2, 12), 'target_room': '6'}
+{'start_pos': (5, 6), 'target_pos': (2, 3), 'target_room': '15'}
+{'start_pos': (3, 1), 'target_pos': (2, 12), 'target_room': '6'}
+{'start_pos': (1, 6), 'target_pos': (4, 2), 'target_room': '7'}
+{'start_pos': (1, 9), 'target_pos': (6, 9), 'target_room': '8'}
+{'start_pos': (5, 6), 'target_pos': (2, 3), 'target_room': '15'}
+{'start_pos': (1, 8), 'target_pos': (6, 9), 'target_room': '8'}
+{'start_pos': (5, 5), 'target_pos': (2, 2), 'target_room': '8'}
+{'start_pos': (3, 11), 'target_pos': (3, 4), 'target_room': '16'}
+{'start_pos': (1, 8), 'target_pos': (4, 0), 'target_room': '13'}

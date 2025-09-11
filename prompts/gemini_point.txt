@@ -1,0 +1,2 @@
+You are given an image of a 2D grid environment. Black cells are walls, brown cells are doors, brown cells with numbers 
+are labeled doors, and white cells are open spaces.
