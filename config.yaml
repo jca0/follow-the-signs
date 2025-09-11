@@ -7,3 +7,5 @@ gemini:
   model: "gemini-2.0-flash"
 openrouter:
   api_key: "YOUR_OPENROUTER_API_KEY"
+github:
+  pat: "YOUR_GITHUB_PAT"
