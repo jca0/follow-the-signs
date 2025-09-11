@@ -1,6 +1,30 @@
 import heapq
 from queue import Queue
 from collections import Counter
+from openai import AzureOpenAI
+
+class Tee:
+    def __init__(self, *streams):
+        self.streams = streams
+
+    def write(self, data):
+        for s in self.streams:
+            try:
+                s.write(data)
+            except Exception:
+                pass
+        for s in self.streams:
+            try:
+                s.flush()
+            except Exception:
+                pass
+
+    def flush(self):
+        for s in self.streams:
+            try:
+                s.flush()
+            except Exception:
+                pass
 
 def bresenham_line(x0, y0, x1, y1):
     """

@@ -12,7 +12,6 @@ from helpers.utils import *
 from helpers.navgpt_agent_maps import *
 from helpers.large_envs import *
 
-
 endpoint = "https://llm-nav.openai.azure.com/"
 deployment = "gpt-4o"
 
@@ -52,7 +51,6 @@ def summarize_history(history: Iterable[HistoryItem], max_items: int = 10, max_c
     summary = " -> ".join(actions)
     return summary[:max_chars]
 
-
 def parse_action(s):
     s = str(s).strip()
     if s.strip('"\'').lower() in FINISH_TOKENS:
@@ -73,7 +71,6 @@ def parse_action(s):
 class NavDecision(BaseModel):
     thought: str = Field(description="Reasoning for choosing the action")
     action: str = Field(description="Either 'Finish' or one of the candidate IDs")
-
 
 def query_llm(O_text, H_text, candidates, valid, goal):
     """Build a compact prompt and parse a structured response.
@@ -119,13 +116,13 @@ def query_llm(O_text, H_text, candidates, valid, goal):
     )
 
     response = client.responses.parse(
-        model=MODEL,
+        model=deployment,
         input=prompt,
         text_format=NavDecision,
     )
     return response.output_parsed
 
-def run_navgpt_agent(seen_occupancy, seen_semantic, start, goal, timeout=250):
+def run_agent(seen_occupancy, seen_semantic, start, goal, timeout=250):
     steps = 0
     agent_pos = start
     heading = "N"
@@ -194,9 +191,9 @@ def run_navgpt_agent(seen_occupancy, seen_semantic, start, goal, timeout=250):
         return -1
 
 if __name__ == "__main__":
-    log = open('logs/navgpt.txt', 'w')
-    sys.stdout = log
-    sys.stderr = log
+    log_file = open('logs/navgpt.log', 'w')
+    sys.stdout = Tee(sys.stdout, log_file)
+    sys.stderr = Tee(sys.stderr, log_file)
 
     seeds = []
     with open('seeds/large/bldg4_seeds.txt', 'r') as f:
@@ -211,8 +208,15 @@ if __name__ == "__main__":
 
     with open('seeds/large/bldg4_navgpt.txt', 'w') as f:
         for i in range(len(seeds)):
-            print("SEED ", i)
-            result = run_navgpt_agent(seen_occupancy, seen_semantic, seeds[i]['start_pos'], seeds[i]['target_room'], timeout=250)
-            f.write(str(result))
-            f.write('\n')
-            print("PATH LENGTH: ", result)
+            try:
+                print("SEED ", i)
+                result = run_agent(seen_occupancy, seen_semantic, seeds[i]['start_pos'], seeds[i]['target_room'], timeout=250)
+                f.write(str(result))
+                f.write('\n')
+                print("PATH LENGTH: ", result)
+            except Exception as e:
+                print(f"Error for seed {i}: {e}")
+                f.write(str(-1))
+                f.write('\n')
+                print("PATH LENGTH: ", result)
+                continue
