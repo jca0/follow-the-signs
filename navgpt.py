@@ -161,7 +161,10 @@ def run_agent(seen_occupancy, seen_semantic, start, goal, timeout=250):
             print("Found goal!")
             goal_found = True
             goal_pos = seen_semantic.find_label(goal)
-            path = seen_occupancy.astar(agent_pos, goal_pos)
+            try:
+                path = seen_occupancy.astar(agent_pos, goal_pos)
+            except Exception as e:
+                path = []
             if path:
                 return steps + len(path)
             else:
@@ -218,5 +221,4 @@ if __name__ == "__main__":
                 print(f"Error for seed {i}: {e}")
                 f.write(str(-1))
                 f.write('\n')
-                print("PATH LENGTH: ", result)
                 continue
