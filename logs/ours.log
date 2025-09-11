@@ -1,0 +1,47 @@
+SEED  0
+
+STEP 1:
+Agent position: (27, 36)
+Reasoning: Analyzed the semantic grid and observed cells. The sign at one location indicates the path to rooms including the goal. Moving forward increases the likelihood of finding the desired room.
+Region: down
+Pattern: rooms segregated by directional signs
+
+STEP 2:
+Agent position: (30, 36)
+Reasoning: Signs from the semantic grid indicate the goal room is ahead. To efficiently locate it, the agent should explore the region north of its current position.
+Region: up
+Pattern: sign reads 'Rooms 113-174 ahead' suggesting northern exploration
+
+STEP 3:
+Agent position: (27, 36)
+Traceback (most recent call last):
+  File "/Users/jingcao/miniconda3/lib/python3.12/site-packages/openai/_base_client.py", line 1027, in request
+    response.raise_for_status()
+  File "/Users/jingcao/miniconda3/lib/python3.12/site-packages/httpx/_models.py", line 763, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '429 Too Many Requests' for url 'https://llm-nav.openai.azure.com/openai/responses?api-version=2025-03-01-preview'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/jingcao/Documents/llm-nav/ours.py", line 136, in <module>
+    result = run_agent(seen_occupancy, seen_semantic, seeds[i]['start_pos'], seeds[i]['target_room'], timeout=250)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jingcao/Documents/llm-nav/ours.py", line 76, in run_agent
+    llm_output = query_llm(seen_occupancy.get_grid(), seen_semantic.get_grid(), agent_pos, goal)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jingcao/Documents/llm-nav/ours.py", line 45, in query_llm
+    response = client.responses.parse(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jingcao/miniconda3/lib/python3.12/site-packages/openai/resources/responses/responses.py", line 1087, in parse
+    return self._post(
+           ^^^^^^^^^^^
+  File "/Users/jingcao/miniconda3/lib/python3.12/site-packages/openai/_base_client.py", line 1259, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jingcao/miniconda3/lib/python3.12/site-packages/openai/_base_client.py", line 1033, in request
+    self._sleep_for_retry(
+  File "/Users/jingcao/miniconda3/lib/python3.12/site-packages/openai/_base_client.py", line 1073, in _sleep_for_retry
+    time.sleep(timeout)
+KeyboardInterrupt
