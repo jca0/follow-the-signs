@@ -1,24 +1,21 @@
 import numpy as np
 import heapq
-import yaml
-import re
-import random
-import json
 
-from openai import OpenAI
+from openai import AzureOpenAI
 
 from .utils import bresenham_line
-from .env_updated import Stud
-from pprint import pprint
-from collections import defaultdict
 
-# load config
-with open("config.yaml", "r") as f:
-    config = yaml.safe_load(f)
+endpoint = "https://llm-nav.openai.azure.com/"
+deployment = "gpt-4o"
 
-OPENAI_API_KEY = config['openai']['api_key']
-MODEL = config['openai']['model']
-client = OpenAI(api_key=OPENAI_API_KEY)
+subscription_key = "YOUR_AZURE_OPENAI_API_KEY"
+api_version = "2025-03-01-preview"
+
+client = AzureOpenAI(
+    api_version=api_version,
+    azure_endpoint=endpoint,
+    api_key=subscription_key,
+)
 
 
 class SeenOccupancyGrid:

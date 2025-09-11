@@ -1,0 +1,5 @@
+openai==1.101
+matplotlib==3.9.2
+numpy
+pillow
+pydantic

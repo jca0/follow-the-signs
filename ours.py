@@ -113,7 +113,7 @@ def run_agent(seen_occupancy, seen_semantic, start, goal, timeout=250):
         return -1
 
 if __name__ == "__main__":  
-    log_file = open('logs/llm_only.log', 'w')
+    log_file = open('logs/ours.log', 'w')
     sys.stdout = Tee(sys.stdout, log_file)
     sys.stderr = Tee(sys.stderr, log_file)
 

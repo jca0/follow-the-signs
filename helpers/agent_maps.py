@@ -1,9 +1,6 @@
 import numpy as np
 import heapq
 from .utils import bresenham_line
-from .env_updated import Stud
-from pprint import pprint
-from collections import defaultdict
 
 class SeenOccupancyGrid:
 
