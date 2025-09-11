@@ -121,18 +121,18 @@ if __name__ == "__main__":
     with open('seeds/large/bldg4_seeds.txt', 'r') as f:
         seeds = [ast.literal_eval(line) for line in f if line.strip()]
 
-    env = Bldg4()
-    occupancy_grid = env.occupancy_grid
-    semantic_grid = env.semantic_grid
-    seen_occupancy = SeenOccupancyGrid(occupancy_grid)
-    seen_semantic = SeenSemanticGrid(semantic_grid)
-    confidence_grid = ConfidenceGrid(len(occupancy_grid), len(occupancy_grid[0]))
-    k = 30
 
     with open('seeds/large/bldg4_ours.txt', 'w') as f:
         for i in range(len(seeds)):
             try:
                 print("SEED ", i)
+                env = Bldg4()
+                occupancy_grid = env.occupancy_grid
+                semantic_grid = env.semantic_grid
+                seen_occupancy = SeenOccupancyGrid(occupancy_grid)
+                seen_semantic = SeenSemanticGrid(semantic_grid)
+                confidence_grid = ConfidenceGrid(len(occupancy_grid), len(occupancy_grid[0]))
+                k = 30
                 result = run_agent(seen_occupancy, seen_semantic, seeds[i]['start_pos'], seeds[i]['target_room'], timeout=250)
                 f.write(str(result))
                 f.write('\n')
