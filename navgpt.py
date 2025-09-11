@@ -1,6 +1,7 @@
 import ast
 import re
 import os
+import sys
 
 from openai import AzureOpenAI
 from typing import Iterable, Union, Tuple, List
@@ -137,7 +138,6 @@ def run_navgpt_agent(seen_occupancy, seen_semantic, start, goal, timeout=250):
         seen_occupancy.update_with_slice(agent_pos, k)
         seen_semantic.update_with_slice(agent_pos, k)
         O_text = seen_semantic.get_slice(agent_pos, k)
-        print("O_text:", O_text)
         candidates = seen_occupancy.get_candidates(agent_pos, heading)
         valid = {cid for cid, _, _ in candidates}
 
@@ -194,6 +194,10 @@ def run_navgpt_agent(seen_occupancy, seen_semantic, start, goal, timeout=250):
         return -1
 
 if __name__ == "__main__":
+    log = open('logs/navgpt.txt', 'w')
+    sys.stdout = log
+    sys.stderr = log
+
     seeds = []
     with open('seeds/large/bldg4_seeds.txt', 'r') as f:
         seeds = [ast.literal_eval(line) for line in f if line.strip()]
