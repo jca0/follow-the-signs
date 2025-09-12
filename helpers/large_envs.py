@@ -233,7 +233,7 @@ class LargeSchwarz:
 
 class NoisySchwarz:
     def __init__(self):
-        self.occupancy_grid = img_to_occgrid(os.path.join(POLYCAM_DIR, "noisy_schwarzman.png"), resolution=10)
+        self.occupancy_grid = img_to_occgrid(os.path.join(POLYCAM_DIR, "noisy_schwarzman.png"), resolution=1)
         row, col = self.occupancy_grid.shape
 
         self.semantic_grid = [[{} for _ in range(col)] for _ in range(row)]
