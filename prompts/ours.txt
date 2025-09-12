@@ -1,59 +1,86 @@
-You are an agent reasoning about a partially observed environment.
-The environment is a 2D grid represented as a Python list of lists. It contains:
-  - 'W': Walls
-  - 'D': Doors that need to be numbered
-  - Digits like '1', '2', etc.: Already numbered doors
-  - '.': Open, walkable space
-  - '?': Unknown/unobserved cells
-  - '*': Your current position
+# Navigation Prompt for Autonomous Agent
 
-You are only given a partial view of the full environment. Your task is to use the currently known grid to hypothesize how all the door cells ('D') should be labeled. Assume the door numbering follows a clear and consistent pattern based on the known numbers and spatial distribution.
+## Task
+You are an LLM assisting an autonomous navigation agent in a partially observable indoor environment. Your task is to:
+1. Analyze the current full seen occupancy grid and seen semantic grid.
+2. Interpret any signs or room numbers to guide navigation toward the goal room.
+3. Infer patterns in room numbers (e.g., "numbers increase eastward", "odd numbers on the left", "numbers decrease clockwise") if possible.
+4. Predict a region of the map that is most likely to contain the goal room based on observed patterns.
 
-Your instructions:
-1. Observe the current belief grid, which contains a mixture of known and unknown values.
-2. Use your reasoning ability to complete the grid by assigning numbers to all the remaining unlabeled door cells ('D').
-3. Follow the pattern implied by the existing numbered doors.
-4. Fill in all 'D' cells with your best estimate of their correct number.
-5. Do not add or remove any cells; preserve the structure of the grid.
+## Environment Format
+You has access to the entire explored map so far. As you move, the seen occupancy and semantic grids are incrementally updated using line-of-sight checks and `k x k` slices, so the full observed map accumulates over time.
 
-Your output must strictly be a valid Python grid (list of lists) with the same dimensions, returning only the updated grid.
-DO NOT include the agent '*' in your grid.
+You will be given the following:
+- **Seen Occupancy Grid**: A grid of integers representing known parts of the environment:
+  - `-1`: Unknown (unexplored)
+  - `0`: Free space (navigable)
+  - `1`: Occupied space (non-navigable)
+- **Semantic Slice**: A grid of dictionaries, where each dictionary may contain:
+  - `"feature_type"`: `"wall"`, `"free"`, `"door"`
+  - `"room_number"`: String (e.g., "6048") for doors
+  - `"sign"`: String (e.g., "Rooms 6000-6050 to the right") for signs
+  - `"pattern"`: String (e.g., "increasing eastward") for previously inferred patterns
+  - Empty dictionary `{}` for unknown cells
+- **Agent Position**: `(y, x)` coordinates within the full grid (not relative to the slice).
 
-Example input:
+## Objective
+Navigate the agent to the specified goal room (e.g., "6048") by suggesting regions that are most likely to contain the specified goal room. If the goal room is not in the slice, use signs, room numbers, or inferred patterns to guide navigation, or explore unknown areas (`-1` in occupancy slice).
+
+## Instructions
+1. **Analyze the Semantic Grid**:
+   - Check for the goal room number in `"room_number"` fields.
+   - Interpret any `"sign"` fields to determine directions (e.g., "Rooms 6000-6050 to the right" means higher numbers are right).
+   - Review existing `"pattern"` fields for prior inferences.
+2. **Predict a Region**:
+   - If a sign indicates the goal’s direction (e.g., "Rooms 6000-6050 to the right"), predict a region in that direction (e.g., right half of the map).
+   - If room numbers suggest a pattern (e.g., "5" at `(y, x)`, "6" at `(y, x+1)` suggests that room numbers increase towards the right so higher numbers are likely to be to the right), predict a region where the goal is likely to be based on the pattern.
+   - If no clear indicators, predict a region with many unexplored cells to encourage exploration.  
+   - Return the region as one of [`"left"`, `"right"`, `"up"`, `"down"`] relative to the agent's current location to explore.
+3. **Infer Patterns (if applicable)**:
+   - If room numbers or signs suggest a pattern (e.g., "increasing eastward" based on "5" at `(y, x)`, "6" at `(y, x+1)`), include it in the output.
+4. **Provide Reasoning**:
+   - Explain why the region was predicted (e.g., based on a sign, room number pattern, or exploration need).
+   - If a pattern is inferred, explain the evidence (e.g., room numbers, signs) and list the cells supporting it.
+
+## Output Format
+Return a JSON object with the following structure:
+```json
+{
+  "reasoning": "string", // Explanation of the action and region prediction
+  "region": "string", // Predicted region (left, right, up, down) of goal
+  "pattern": "string", // Inferred pattern (e.g., "increasing eastward")
+}
 ```
-[
-    ['W', '.', 'D', '.', '.', '.', '.'],
-    ['W', 'W', 'W', '.', '.', '.', '.'],
-    ['W', '.', 'D', '.', '.', '.', '.'],
-    ['W', 'W', 'W', '.', '.', '.', '.'],
-    ['W', '.', '10', '.', '.', '.', '.'],
-    ['W', 'W', 'W', '.', '.', '.', '.'],
-    ['W', '.', '.', '.', '.', '.', '.'],
-    ['W', '*', '.', '.', '.', '.', '.'],
-    ['W', '1', 'W', '2', 'W', 'D', 'W'],
-    ['W', '.', 'W', '.', 'W', '.', 'W'],
-    ['W', 'W', 'W', 'W', 'W', 'W', 'W']
-]
-```
 
-Expected output:
-```
-[
-    ['W', '.', '9', '.', '.', '.', '.'],
-    ['W', 'W', 'W', '.', '.', '.', '.'],
-    ['W', '.', '8', '.', '.', '.', '.'],
-    ['W', 'W', 'W', '.', '.', '.', '.'],
-    ['W', '.', '10', '.', '.', '.', '.'],
-    ['W', 'W', 'W', '.', '.', '.', '.'],
-    ['W', '.', '.', '.', '.', '.', '.'],
-    ['W', '.', '.', '.', '.', '.', '.'],
-    ['W', '1', 'W', '2', 'W', '3', 'W'],
-    ['W', '.', 'W', '.', 'W', '.', 'W'],
-    ['W', 'W', 'W', 'W', 'W', 'W', 'W']
-]
-```
+## Example
+### Input
+- Goal Room: "6048"
+- Agent Position: (5, 1)
+- Semantic Grid:
+[[{"feature_type": "wall"}, {"feature_type": "wall"}, {"feature_type": "wall"}, {"feature_type": "wall"}],
+ [{"feature_type": "wall"}, {"feature_type": "free"}, {}, {}],
+ [{"feature_type": "wall"}, {"feature_type": "free"}, {}, {}],
+ [{"feature_type": "wall"}, {"feature_type": "free"}, {}, {}],
+ [{"feature_type": "wall"}, {"feature_type": "free"}, {}, {}],
+ [{"feature_type": "wall"}, {"feature_type": "free"}, {"feature_type": "door", "room_number": "5"}, {}],
+ [{"feature_type": "wall"}, {"feature_type": "free"}, {}, {}],
+ [{"feature_type": "wall"}, {"feature_type": "free"}, {}, {}],
+ [{"feature_type": "wall"}, {"feature_type": "free"}, {}, {}],
+ [{"feature_type": "wall"}, {"feature_type": "free"}, {}, {}],
+ [{"feature_type": "wall"}, {"feature_type": "wall"}, {"feature_type": "wall"}, {"feature_type": "wall"}]]
 
-{sign_info}
+ ### Output
+ {
+  "reasoning": "The goal room '6048' is not in the semantic grid. A door with room number '5' is at (5, 2). Assuming room numbers increase eastward (as typical in a hallway layout), the goal room '6048' is likely in the right half of the map. The predicted right region covers the right side, where unexplored cells (empty dictionaries) are located. The pattern 'increasing eastward' is inferred based on room '5' at (5, 2). Moving right approaches this region.",
+  "region": "right",
+  "pattern": "increasing eastward"
+}
 
-Now complete the following grid by replacing 'D' cells with numbers. Return ONLY the grid and nothing else.
-{grid}
+
+## Current Inputs
+- Goal Room: {goal}
+- Agent Position: {agent_pos}
+- Occupancy Grid:
+{seen_occupancy_grid}
+- Semantic Grid: 
+{seen_semantic_grid}

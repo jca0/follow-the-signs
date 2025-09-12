@@ -33,7 +33,7 @@ class NavDecision(BaseModel):
 def query_llm(seen_occupancy_grid, seen_semantic_grid, agent_pos, goal):
     """
     """
-    with open("prompts/ours_new.txt", "r") as f:
+    with open("prompts/ours.txt", "r") as f:
         prompt_template = f.read()
 
     safe = prompt_template.replace("{", "{{").replace("}", "}}")
