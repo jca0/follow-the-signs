@@ -26,8 +26,8 @@ class SpotEnv:
 
 
 class TestEnv(SpotEnv):
-    def __init__(self):
-        super().__init__(resolution_m=1, origin_xy_m=(0, 0), origin_yaw_rad=0.0)
+    def __init__(self, resolution_m=1, origin_xy_m=(0, 0), origin_yaw_rad=0.0):
+        super().__init__(resolution_m=resolution_m, origin_xy_m=origin_xy_m, origin_yaw_rad=origin_yaw_rad)
 
         self.occupancy_grid = np.array([
             [0, 0, 0],

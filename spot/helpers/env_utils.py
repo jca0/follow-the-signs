@@ -57,10 +57,17 @@ def bresenham_line(x0, y0, x1, y1):
 def render_grid(env, robot_r: int, robot_c: int) -> str:
     rows, cols = env.occupancy_grid.shape
     lines = []
-    for r in range(rows):
+    # Print with c increasing upward and r increasing to the left.
+    # Mapping to printed indices: pr = rows-1-c, pc = cols-1-r
+    star_pr = rows - 1 - robot_c
+    star_pc = cols - 1 - robot_r
+    for pr in range(rows):
         row_chars = []
-        for c in range(cols):
-            if r == robot_r and c == robot_c:
+        for pc in range(cols):
+            # Inverse map to env indices
+            r = cols - 1 - pc
+            c = rows - 1 - pr
+            if pr == star_pr and pc == star_pc:
                 ch = '*'
             else:
                 ch = '#' if env.occupancy_grid[r][c] == 1 else '.'
