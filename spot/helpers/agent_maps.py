@@ -1,6 +1,6 @@
 import numpy as np
 import heapq
-from .utils import bresenham_line
+from .env_utils import bresenham_line
 
 class SeenOccupancyGrid:
 

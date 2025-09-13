@@ -13,46 +13,66 @@ from bosdyn.client.robot import Robot
 from bosdyn.client.lease import LeaseKeepAlive
 import bosdyn.client.estop
 
+from helpers.robot_structs import *
+
+
 DEFAULT_SPOT_IP= "192.168.80.3"
 
-@dataclass
-class RobotClient:
-    robot: Robot
-    command_client: RobotCommandClient
-    state_client: RobotStateClient
-    lease_keepalive: LeaseKeepAlive
-    home_pose: math_helpers.SE2Pose
+def move_to_cell(command_client: RobotCommandClient, grid_loc: GridLocalizer, r, c, yaw_rad=0.0, timeout=20.0):
+    odom_goal = grid_loc.odom_pose_from_cell(r, c, yaw_rad)
+    cmd = RobotCommandBuilder.synchro_se2_trajectory_point_command(
+        goal_x=odom_goal.x,
+        goal_y=odom_goal.y,
+        goal_heading=odom_goal.angle,
+        frame_name=ODOM_FRAME_NAME,
+        params=RobotCommandBuilder.mobility_params(stair_hint=False)
+        )
+    cmd_id = command_client.robot_command(lease=None, command=cmd, end_time_secs=time.time() + timeout)
 
-def move_to_cell():
-    pass
-
-def relative_move(dx, dy, dyaw, frame_name=ODOM_FRAME_NAME, robot_command_client=None, robot_state_client=None, stairs=False):
-    transforms = robot_state_client.get_robot_state().kinematic_state.transforms_snapshot
-
-    body_tform_goal = math_helpers.SE2Pose(x=dx, y=dy, angle=dyaw)
-    out_tform_body = get_se2_a_tform_b(transforms, frame_name, BODY_FRAME_NAME)
-    out_tform_goal = out_tform_body * body_tform_goal
-
-    robot_cmd = RobotCommandBuilder.synchro_se2_trajectory_point_command(
-        goal_x=out_tform_goal.x, goal_y=out_tform_goal.y, goal_heading=out_tform_goal.angle,
-        frame_name=frame_name, params=RobotCommandBuilder.mobility_params(stair_hint=stairs))
-    end_time = 10.0
-    cmd_id = robot_command_client.robot_command(lease=None, command=robot_cmd,
-                                                end_time_secs=time.time() + end_time)
     while True:
-        feedback = robot_command_client.robot_command_feedback(cmd_id)
-        mobility_feedback = feedback.feedback.synchronized_feedback.mobility_command_feedback
-        if mobility_feedback.status != RobotCommandFeedbackStatus.STATUS_PROCESSING:
+        fb = command_client.robot_command_feedback(cmd_id)
+        mfb = fb.feedback.synchronized_feedback.mobility_command_feedback
+        if mfb.status != RobotCommandFeedbackStatus.STATUS_PROCESSING:
             print('Failed to reach the goal')
             return False
-        traj_feedback = mobility_feedback.se2_trajectory_feedback
-        if (traj_feedback.status == traj_feedback.STATUS_AT_GOAL and
-                traj_feedback.body_movement_status == traj_feedback.BODY_STATUS_SETTLED):
+        tfb = mfb.se2_trajectory_feedback
+        if (tfb.status == tfb.STATUS_AT_GOAL and
+                tfb.body_movement_status == tfb.BODY_STATUS_SETTLED):
             print('Arrived at the goal.')
             return True
         time.sleep(1)
 
     return True
+    
+
+def move_relative(dx, dy, dyaw, frame_name=ODOM_FRAME_NAME, command_client=None, state_client=None, stairs=False):
+    transforms = state_client.get_robot_state().kinematic_state.transforms_snapshot
+
+    body_tform_goal = math_helpers.SE2Pose(x=dx, y=dy, angle=dyaw)
+    out_tform_body = get_se2_a_tform_b(transforms, frame_name, BODY_FRAME_NAME)
+    out_tform_goal = out_tform_body * body_tform_goal
+
+    cmd = RobotCommandBuilder.synchro_se2_trajectory_point_command(
+        goal_x=out_tform_goal.x, goal_y=out_tform_goal.y, goal_heading=out_tform_goal.angle,
+        frame_name=frame_name, params=RobotCommandBuilder.mobility_params(stair_hint=stairs))
+    end_time = 10.0
+    cmd_id = command_client.robot_command(lease=None, command=cmd,
+                                                end_time_secs=time.time() + end_time)
+    while True:
+        fb = command_client.robot_command_feedback(cmd_id)
+        mfb = fb.feedback.synchronized_feedback.mobility_command_feedback
+        if mfb.status != RobotCommandFeedbackStatus.STATUS_PROCESSING:
+            print('Failed to reach the goal')
+            return False
+        tfb = mfb.se2_trajectory_feedback
+        if (tfb.status == tfb.STATUS_AT_GOAL and
+                tfb.body_movement_status == tfb.BODY_STATUS_SETTLED):
+            print('Arrived at the goal.')
+            return True
+        time.sleep(1)
+
+    return True
+    
 
 def setup_robot(hostname=DEFAULT_SPOT_IP):
     bosdyn.client.util.setup_logging(False)
