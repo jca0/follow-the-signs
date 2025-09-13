@@ -53,3 +53,17 @@ def bresenham_line(x0, y0, x1, y1):
             y += sy
         points.append((x1, y1))
     return points
+
+def render_grid(env, robot_r: int, robot_c: int) -> str:
+    rows, cols = env.occupancy_grid.shape
+    lines = []
+    for r in range(rows):
+        row_chars = []
+        for c in range(cols):
+            if r == robot_r and c == robot_c:
+                ch = '*'
+            else:
+                ch = '#' if env.occupancy_grid[r][c] == 1 else '.'
+            row_chars.append(ch)
+        lines.append(''.join(row_chars))
+    return '\n'.join(lines)

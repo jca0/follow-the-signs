@@ -46,7 +46,21 @@ class GridLocalizer:
         self._last_pose = odom_T_body
         return odom_T_body
 
+    def cell_from_odom_pose(self, odom_pose):
+        grid_T_body = self._odom_T_grid.inverse() * odom_pose
+        return self._env.cell_from_se2(grid_T_body)
+
     def get_last_pose(self):
         return self._last_pose
+
+    def get_last_cell(self):
+        return self.cell_from_odom_pose(self._last_pose)
+
+    def get_current_cell(self):
+        transforms = self._robot.state_client.get_robot_state().kinematic_state.transforms_snapshot
+        odom_T_body = get_se2_a_tform_b(transforms, ODOM_FRAME_NAME, BODY_FRAME_NAME)
+        return self.cell_from_odom_pose(odom_T_body)
+
+    
 
 # TODO make function to go to a cell in grid

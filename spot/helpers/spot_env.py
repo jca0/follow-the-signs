@@ -11,11 +11,19 @@ class SpotEnv:
         x = (c + 0.5) * self.resolution_m - self.origin_xy_m[0]
         y = (r + 0.5) * self.resolution_m - self.origin_xy_m[1]
         return x, y
+
+    def cell_from_xy(self, x, y):
+        c = int(np.floor((x + self.origin_xy_m[0]) / self.resolution_m))
+        r = int(np.floor((y + self.origin_xy_m[1]) / self.resolution_m))
+        return r, c
     
     def se2_from_cell(self, r, c, yaw_rad):
         x, y = self.cell_center_xy(r, c)
         return math_helpers.SE2Pose(x, y, yaw_rad)
-        
+
+    def cell_from_se2(self, se2):
+        return self.cell_from_xy(se2.x, se2.y)
+
 
 class TestEnv(SpotEnv):
     def __init__(self):
