@@ -13,12 +13,14 @@ import time
 
 import bosdyn.client
 import bosdyn.client.lease
+from bosdyn.client.lease import LeaseClient
 import bosdyn.client.util
 import bosdyn.geometry
 from bosdyn.api import trajectory_pb2
 from bosdyn.api.spot import robot_command_pb2 as spot_command_pb2
 from bosdyn.client import math_helpers
 from bosdyn.client.frame_helpers import GRAV_ALIGNED_BODY_FRAME_NAME, ODOM_FRAME_NAME, get_a_tform_b
+from bosdyn.api.basic_command_pb2 import RobotCommandFeedbackStatus
 from bosdyn.client.image import ImageClient
 from bosdyn.client.robot_command import RobotCommandBuilder, RobotCommandClient, blocking_stand
 from bosdyn.client.robot_state import RobotStateClient
