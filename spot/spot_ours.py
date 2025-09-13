@@ -6,7 +6,7 @@ from openai import AzureOpenAI
 from typing import Literal
 from pydantic import BaseModel, Field
 
-from helpers.utils import *
+from helpers.env_utils import *
 from helpers.agent_maps import *
 from helpers.spot_env import *
 
@@ -22,7 +22,7 @@ client = AzureOpenAI(
     api_key=subscription_key,
 )
 
-PATH_STEPS = 3
+CELLS_PER_STEP = 3
 k = 3
 
 class NavDecision(BaseModel):
@@ -50,7 +50,7 @@ def query_llm(seen_occupancy_grid, seen_semantic_grid, agent_pos, goal):
 
     return response.output_parsed
 
-def run_agent(seen_occupancy, seen_semantic, start, goal, timeout=250):
+def run_agent(seen_occupancy, seen_semantic, start, goal, k, path_steps=1, timeout=250):
     steps = 0
     found_goal = False
     agent_pos = start
@@ -85,15 +85,15 @@ def run_agent(seen_occupancy, seen_semantic, start, goal, timeout=250):
 
         # next step
         path_to_max_confidence = seen_occupancy.plan_towards(agent_pos, max_confidence_pos)
-        if len(path_to_max_confidence) < PATH_STEPS:
+        if len(path_to_max_confidence) < CELLS_PER_STEP:
             agent_pos = path_to_max_confidence[-1]
-            move_to_cell(agent_pos) # TODO 
+            # move_to_cell(agent_pos) # TODO 
             total_steps += len(path_to_max_confidence)
         else:
             try:
-                agent_pos = path_to_max_confidence[PATH_STEPS] # set agent's next position
-                move_to_cell(agent_pos) # TODO
-                total_steps += PATH_STEPS
+                agent_pos = path_to_max_confidence[CELLS_PER_STEP] # set agent's next position
+                # move_to_cell(agent_pos) # TODO
+                total_steps += CELLS_PER_STEP
             except:
                 print("No valid path to max confidence.")
                 break
@@ -121,5 +121,5 @@ if __name__ == "__main__":
     seen_occupancy = SeenOccupancyGrid(occupancy_grid)
     seen_semantic = SeenSemanticGrid(semantic_grid)
     confidence_grid = ConfidenceGrid(len(occupancy_grid), len(occupancy_grid[0]))
-    result = run_agent(seen_occupancy, seen_semantic, (0, 0), '1')
+    result = run_agent(seen_occupancy, seen_semantic, (0, 0), '1', 1)
     print(result)
