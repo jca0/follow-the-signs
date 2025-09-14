@@ -47,3 +47,81 @@ class TestEnv(SpotEnv):
     
         self.semantic_grid[1][1]["room_number"] = "1"
 
+
+# class RealSchwarz(SpotEnv):
+#     def __init__(self, resolution_m=1, origin_xy_m=(0, 0), origin_yaw_rad=0.0):
+#         super().__init__(resolution_m=resolution_m, origin_xy_m=origin_xy_m, origin_yaw_rad=origin_yaw_rad)
+
+#         self.occupancy_grid = np.array([
+#             [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1],
+#             [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1],
+#             [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1],
+#             [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1],
+#             [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1],
+#             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+#             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+#             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+#             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+#         ])
+#         row, col = self.occupancy_grid.shape
+        
+#         self.semantic_grid = [[{} for _ in range(col)] for _ in range(row)]
+#         for y in range(row):
+#             for x in range(col):
+#                 if self.occupancy_grid[y][x] == 1:
+#                     self.semantic_grid[y][x] = {"feature_type": "wall"}
+#                 else:
+#                     self.semantic_grid[y][x] = {"feature_type": "free"}
+        
+#         self.semantic_grid[8][14]["room_number"] = "621"
+#         self.semantic_grid[8][15]["room_number"] = "621"
+#         self.semantic_grid[8][16]["room_number"] = "621"
+#         self.semantic_grid[8][17]["room_number"] = "621"
+#         self.semantic_grid[8][33]["room_number"] = "631"
+#         self.semantic_grid[8][34]["room_number"] = "631"
+#         self.semantic_grid[8][35]["room_number"] = "631"
+
+#         self.semantic_grid[2][3]["sign"] = "Rooms 621-631 southward."
+#         self.semantic_grid[8][6]["sign"] = "Rooms 621-631 to the right."
+#         self.semantic_grid[8][14]["sign"] = "Room 631 to the right."
+
+
+class RealSchwarz(SpotEnv):
+    def __init__(self, resolution_m=1, origin_xy_m=(0, 0), origin_yaw_rad=0.0):
+        super().__init__(resolution_m=resolution_m, origin_xy_m=origin_xy_m, origin_yaw_rad=origin_yaw_rad)
+
+        # Flip occupancy grid horizontally
+        self.occupancy_grid = np.array([
+            [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1][::-1],
+            [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1][::-1],
+            [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1][::-1],
+            [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1][::-1],
+            [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1][::-1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0][::-1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0][::-1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0][::-1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0][::-1],
+        ])
+        row, col = self.occupancy_grid.shape
+
+        # Build semantic grid
+        self.semantic_grid = [[{} for _ in range(col)] for _ in range(row)]
+        for y in range(row):
+            for x in range(col):
+                if self.occupancy_grid[y][x] == 1:
+                    self.semantic_grid[y][x] = {"feature_type": "wall"}
+                else:
+                    self.semantic_grid[y][x] = {"feature_type": "free"}
+
+        # Flipped indices: col' = n_cols - 1 - col
+        n = col
+        # Rooms
+        for c in [14, 15, 16, 17]:
+            self.semantic_grid[8][n - 1 - c]["room_number"] = "621"
+        for c in [33, 34, 35]:
+            self.semantic_grid[8][n - 1 - c]["room_number"] = "631"
+
+        # Signs
+        self.semantic_grid[2][n - 1 - 3]["sign"] = "Rooms 621-631 southward."
+        self.semantic_grid[8][n - 1 - 6]["sign"] = "Rooms 621-631 to the right."
+        self.semantic_grid[8][n - 1 - 14]["sign"] = "Room 631 to the right."

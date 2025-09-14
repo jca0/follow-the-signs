@@ -1,6 +1,7 @@
 import ast
 import os
 import sys
+import math
 
 from openai import AzureOpenAI
 from typing import Literal
@@ -9,6 +10,7 @@ from pydantic import BaseModel, Field
 from helpers.env_utils import *
 from helpers.agent_maps import *
 from helpers.spot_env import *
+from helpers.spot_utils import *
 
 endpoint = "https://llm-nav.openai.azure.com/"
 deployment = "gpt-4o"
@@ -22,7 +24,7 @@ client = AzureOpenAI(
     api_key=subscription_key,
 )
 
-CELLS_PER_STEP = 3
+CELLS_PER_STEP = 1
 k = 3
 
 class NavDecision(BaseModel):
@@ -33,7 +35,7 @@ class NavDecision(BaseModel):
 def query_llm(seen_occupancy_grid, seen_semantic_grid, agent_pos, goal):
     """
     """
-    with open("prompts/ours.txt", "r") as f:
+    with open("../prompts/ours.txt", "r") as f:
         prompt_template = f.read()
 
     safe = prompt_template.replace("{", "{{").replace("}", "}}")
@@ -50,11 +52,12 @@ def query_llm(seen_occupancy_grid, seen_semantic_grid, agent_pos, goal):
 
     return response.output_parsed
 
-def run_agent(seen_occupancy, seen_semantic, start, goal, k, path_steps=1, timeout=250):
+def run_agent(env, command_client, grid_loc, seen_occupancy, seen_semantic, confidence_grid, start, goal, k, path_steps=1, timeout=250):
     steps = 0
     found_goal = False
     agent_pos = start
     total_steps = 0
+    rows, cols = seen_occupancy.get_grid().shape
 
     while steps < timeout:
         steps += 1
@@ -62,6 +65,7 @@ def run_agent(seen_occupancy, seen_semantic, start, goal, k, path_steps=1, timeo
         print("Agent position:", agent_pos)
         seen_occupancy.update_with_slice(agent_pos, k)
         seen_semantic.update_with_slice(agent_pos, k)
+        # print(f"Seen occupancy: {seen_occupancy.mark_grid(agent_pos)}")
 
         goal_pos = seen_semantic.find_label(goal)
         if goal_pos:
@@ -85,16 +89,27 @@ def run_agent(seen_occupancy, seen_semantic, start, goal, k, path_steps=1, timeo
 
         # next step
         path_to_max_confidence = seen_occupancy.plan_towards(agent_pos, max_confidence_pos)
-        if len(path_to_max_confidence) < CELLS_PER_STEP:
+        print(f"Path to max confidence: {path_to_max_confidence}")
+        if len(path_to_max_confidence) < path_steps:
             agent_pos = path_to_max_confidence[-1]
-            # move_to_cell(agent_pos) # TODO 
+            cr, cc = grid_loc.get_current_cell()
+            cx, cy = env.cell_center_xy(cr, cc)
+            tx, ty = env.cell_center_xy(agent_pos[0], agent_pos[1])
+            yaw = math.atan2(ty - cy, tx - cx)
+            move_to_cell(command_client, grid_loc, agent_pos[0], cols-1-agent_pos[1], yaw)
             total_steps += len(path_to_max_confidence)
         else:
             try:
-                agent_pos = path_to_max_confidence[CELLS_PER_STEP] # set agent's next position
-                # move_to_cell(agent_pos) # TODO
-                total_steps += CELLS_PER_STEP
-            except:
+                agent_pos = path_to_max_confidence[path_steps] # set agent's next position
+                print(f"Moving to cell: {agent_pos}")
+                # cr, cc = grid_loc.get_current_cell()
+                # cx, cy = env.cell_center_xy(cr, cc)
+                # tx, ty = env.cell_center_xy(agent_pos[0], agent_pos[1])
+                # yaw = math.atan2(ty - cy, tx - cx)
+                move_to_cell(command_client, grid_loc, agent_pos[0], agent_pos[1], 0)
+                total_steps += path_steps
+            except Exception as e:
+                print(f"Error: {e}")
                 print("No valid path to max confidence.")
                 break
 
@@ -121,5 +136,5 @@ if __name__ == "__main__":
     seen_occupancy = SeenOccupancyGrid(occupancy_grid)
     seen_semantic = SeenSemanticGrid(semantic_grid)
     confidence_grid = ConfidenceGrid(len(occupancy_grid), len(occupancy_grid[0]))
-    result = run_agent(seen_occupancy, seen_semantic, (0, 0), '1', 1)
+    result = run_agent(seen_occupancy, seen_semantic, confidence_grid, (0, 0), '1', 1)
     print(result)
