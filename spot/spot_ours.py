@@ -92,11 +92,12 @@ def run_agent(env, command_client, grid_loc, seen_occupancy, seen_semantic, conf
         print(f"Path to max confidence: {path_to_max_confidence}")
         if len(path_to_max_confidence) < path_steps:
             agent_pos = path_to_max_confidence[-1]
-            cr, cc = grid_loc.get_current_cell()
-            cx, cy = env.cell_center_xy(cr, cc)
-            tx, ty = env.cell_center_xy(agent_pos[0], agent_pos[1])
-            yaw = math.atan2(ty - cy, tx - cx)
-            move_to_cell(command_client, grid_loc, agent_pos[0], cols-1-agent_pos[1], yaw)
+            # cr, cc = grid_loc.get_current_cell()
+            # cx, cy = env.cell_center_xy(cr, cc)
+            # tx, ty = env.cell_center_xy(agent_pos[0], agent_pos[1])
+            # yaw = math.atan2(ty - cy, tx - cx)
+            yaw = 0
+            move_to_cell(command_client, grid_loc, agent_pos[0], agent_pos[1], yaw)
             total_steps += len(path_to_max_confidence)
         else:
             try:
@@ -106,7 +107,8 @@ def run_agent(env, command_client, grid_loc, seen_occupancy, seen_semantic, conf
                 # cx, cy = env.cell_center_xy(cr, cc)
                 # tx, ty = env.cell_center_xy(agent_pos[0], agent_pos[1])
                 # yaw = math.atan2(ty - cy, tx - cx)
-                move_to_cell(command_client, grid_loc, agent_pos[0], agent_pos[1], 0)
+                yaw = 0
+                move_to_cell(command_client, grid_loc, agent_pos[0], agent_pos[1], yaw)
                 total_steps += path_steps
             except Exception as e:
                 print(f"Error: {e}")
