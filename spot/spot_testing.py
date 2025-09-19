@@ -25,10 +25,13 @@ if __name__ == "__main__":
     confidence_grid = ConfidenceGrid(len(occupancy_grid), len(occupancy_grid[0]))
 
     grid_loc = GridLocalizer(robot_client, env)
-    grid_loc.calibrate(3, 20)
+    grid_loc.calibrate(4, 21, body_yaw_rad=-1.7)
     # print(render_grid(env, *grid_loc.get_current_cell()))
     agent_pos = grid_loc.get_current_cell()
     print(f"Agent position: {agent_pos}")
+
+    trajectory = [(4, 21), (2, 21), (2, 23)] # rotates 90, move forward, move right
+    # TODO: flip env about vertical axis
 
     # # run_agent(env, command_client, grid_loc, seen_occupancy, seen_semantic, confidence_grid, agent_pos, '631', 7, path_steps=3)
     for r, c in trajectory:
@@ -37,8 +40,8 @@ if __name__ == "__main__":
         # tx, ty = env.cell_center_xy(r, c)
         # yaw = math.atan2(ty - cy, tx - cx)
         move_to_cell(robot_client.command_client, grid_loc, r, c, 0)
-        print(grid_loc.get_current_cell(), (r, c))
-        print(render_grid(env, *grid_loc.get_current_cell()))
+        # print(grid_loc.get_current_cell(), (r, c))
+        # print(render_grid(env, *grid_loc.get_current_cell()))
 
     # move_relative(1, 0, 0, frame_name=ODOM_FRAME_NAME, command_client=robot_client.command_client, state_client=robot_client.state_client)
 
