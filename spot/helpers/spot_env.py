@@ -91,4 +91,39 @@ class RealSchwarz(SpotEnv):
         self.semantic_grid[4][15]["sign"] = "Rooms 607–609, 611–615, 621 to the right; Rooms 631–633, 641, 646 to the left."
 
 
-# TODO: fix orientation of grid to match perspective from elevator
+class RealSchwarzExtended(SpotEnv):
+    def __init__(self, resolution_m=1, origin_xy_m=(0, 0), origin_yaw_rad=0.0):
+        super().__init__(resolution_m=resolution_m, origin_xy_m=origin_xy_m, origin_yaw_rad=origin_yaw_rad)
+
+        self.occupancy_grid = np.array([
+            [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1],
+            [1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1],
+            [1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1],
+            [1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1],
+            [1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1],
+        ])
+        row, col = self.occupancy_grid.shape
+
+        self.semantic_grid = [[{} for _ in range(col)] for _ in range(row)]
+        for y in range(row):
+            for x in range(col):
+                if self.occupancy_grid[y][x] == 1:
+                    self.semantic_grid[y][x] = {"feature_type": "wall"}
+                else:
+                    self.semantic_grid[y][x] = {"feature_type": "free"}
+
+        self.semantic_grid[0][20]["room_number"] = "621"
+        self.semantic_grid[0][34]["room_number"] = "631"
+        self.semantic_grid[0][10]["room_number"] = "615"
+        self.semantic_grid[4][8]["room_number"] = "609"
+        self.semantic_grid[4][5]["room_number"] = "607"
+        self.semantic_grid[0][3]["room_number"] = "611"
+        self.semantic_grid[6][1]["room_number"] = "601N"
+
+        self.semantic_grid[4][30]["sign"] = "Rooms 607–609, 611–615, 621, 631–633, 644–646 upwards."
+        self.semantic_grid[4][26]["sign"] = "Rooms 607–609, 611–615, 621 to the right; Rooms 631–633, 641, 646 to the left."
+        self.semantic_grid[4][10]["sign"] = "Rooms 607-609, 611-615 to the right."
