@@ -34,8 +34,8 @@ class GridLocalizer:
         transforms = self._robot.state_client.get_robot_state().kinematic_state.transforms_snapshot
         odom_T_body = get_se2_a_tform_b(transforms, ODOM_FRAME_NAME, BODY_FRAME_NAME)
 
-        # pose of cell in unanchored grid grame
-        grid_T_body = self._env.se2_from_cell(r, c, body_yaw_rad or odom_T_body.angle)
+        # pose of cell in unanchored grid frame
+        grid_T_body = self._env.se2_from_cell(r, c, body_yaw_rad)
 
         self._odom_T_grid = odom_T_body * grid_T_body.inverse()
         self._last_pose = odom_T_body
